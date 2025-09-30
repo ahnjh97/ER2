@@ -7,11 +7,12 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AI;
+using static UnityEngine.GraphicsBuffer;
 
 public class YukiController : MyPlayerController
 {
-    float dashDistance = 5f;
-    float dashDuration = 0.2f;
+    float _dashDistance = 5f;
+    float _dashDuration = 0.2f;
 
     private bool isDashing = false;
 
@@ -74,74 +75,92 @@ public class YukiController : MyPlayerController
     #region Skill : E
     void Dash()
     {
-        Vector3 mousePos = Input.mousePosition;
-        mousePos.z = Camera.main.transform.position.y;
-        Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(mousePos);
+        Vector3 _targetPos = GetTargetPos(_dashDistance);
 
-        Vector3 direction = (mouseWorld - transform.position);
-        direction.y = 0f;
-        direction.Normalize();
-
-        if (direction.sqrMagnitude > 0.001f)
-        {
-            transform.rotation = Quaternion.LookRotation(direction);
-        }
-
-        StartCoroutine(DashCoroutine(direction));
+        StartCoroutine(CoMoveToTarget(_targetPos));
     }
 
-    private IEnumerator DashCoroutine(Vector3 direction)
+    IEnumerator CoMoveToTarget(Vector3 targetPos)
     {
-        isDashing = true;
-        _navMeshAgent.enabled = false;
-
-        Vector3 startPos = transform.position;
-        Vector3 rawEndPos = startPos + direction * dashDistance;
-        Vector3 endPos = rawEndPos;
-
-        // Collider 있는 벽 체크
-        if (CheckWall(startPos, rawEndPos, out Vector3 stopPos))
+        while (Vector3.Distance(transform.position, targetPos) > 0.05f)
         {
-            endPos = stopPos;
-        }
-        else
-        {
-            if (NavMesh.SamplePosition(rawEndPos, out NavMeshHit hit, 0.5f, NavMesh.AllAreas))
-                endPos = hit.position;
-            else
-                endPos = startPos;
-        }
-
-        // 실제 대시 이동
-        float elapsed = 0f;
-        while (elapsed < dashDuration)
-        {
-            transform.position = Vector3.Lerp(startPos, endPos, elapsed / dashDuration);
-            elapsed += Time.deltaTime;
+            transform.position = Vector3.MoveTowards(transform.position, targetPos, 15f * Time.deltaTime);
             yield return null;
         }
 
-        transform.position = endPos;
-        _navMeshAgent.enabled = true;
-        isDashing = false;
+        transform.position = targetPos;
     }
 
-    // Collider 있는 벽 체크
-    private bool CheckWall(Vector3 start, Vector3 end, out Vector3 stopPos)
-    {
-        Vector3 dir = (end - start).normalized;
-        float dist = Vector3.Distance(start, end);
+    //void Dash()
+    //{
+    //    Vector3 mousePos = Input.mousePosition;
+    //    mousePos.z = Camera.main.transform.position.y;
+    //    Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(mousePos);
 
-        int dashWallMask = LayerMask.GetMask("Wall");
+    //    Vector3 direction = (mouseWorld - transform.position);
+    //    direction.y = 0f;
+    //    direction.Normalize();
 
-        if (Physics.Raycast(start, dir, out RaycastHit hit, dist, dashWallMask))
-        {
-            stopPos = hit.point;
-            return true;
-        }
+    //    if (direction.sqrMagnitude > 0.001f)
+    //    {
+    //        transform.rotation = Quaternion.LookRotation(direction);
+    //    }
 
-        stopPos = end;
-        return false;
-    }
+    //    StartCoroutine(DashCoroutine(direction));
+    //}
+
+    //private IEnumerator DashCoroutine(Vector3 direction)
+    //{
+    //    isDashing = true;
+    //    _navMeshAgent.enabled = false;
+
+    //    Vector3 startPos = transform.position;
+    //    Vector3 rawEndPos = startPos + direction * dashDistance;
+    //    Vector3 endPos = rawEndPos;
+
+    //    // Collider 있는 벽 체크
+    //    if (CheckWall(startPos, rawEndPos, out Vector3 stopPos))
+    //    {
+    //        endPos = stopPos;
+    //    }
+    //    else
+    //    {
+    //        if (NavMesh.SamplePosition(rawEndPos, out NavMeshHit hit, 0.5f, NavMesh.AllAreas))
+    //            endPos = hit.position;
+    //        else
+    //            endPos = startPos;
+    //    }
+
+    //    // 실제 대시 이동
+    //    float elapsed = 0f;
+    //    while (elapsed < dashDuration)
+    //    {
+    //        transform.position = Vector3.Lerp(startPos, endPos, elapsed / dashDuration);
+    //        elapsed += Time.deltaTime;
+    //        yield return null;
+    //    }
+
+    //    transform.position = endPos;
+    //    _navMeshAgent.enabled = true;
+    //    isDashing = false;
+    //}
+
+    //// Collider 있는 벽 체크
+    //private bool CheckWall(Vector3 start, Vector3 end, out Vector3 stopPos)
+    //{
+    //    Vector3 dir = (end - start).normalized;
+    //    float dist = Vector3.Distance(start, end);
+
+    //    int dashWallMask = LayerMask.GetMask("Wall");
+
+    //    if (Physics.Raycast(start, dir, out RaycastHit hit, dist, dashWallMask))
+    //    {
+    //        stopPos = hit.point;
+    //        return true;
+    //    }
+
+    //    stopPos = end;
+    //    return false;
+    //}
     #endregion
 }

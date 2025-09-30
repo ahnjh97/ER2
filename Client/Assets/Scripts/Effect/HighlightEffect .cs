@@ -19,6 +19,7 @@ namespace Assets.Scripts.Highlight
             myRenderer = GetComponentInChildren<Renderer>();
             _cursorDefault = Managers.Resource.Load<Texture2D>("Cursor/Cursor_01");
             _cursorEnemy = Managers.Resource.Load<Texture2D>("Cursor/Cursor_05");
+
             outlineMaterial = Resources.Load<Material>("materials/Outline/Outline");
             if (outlineMaterial == null || myRenderer == null)
             {
