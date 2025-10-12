@@ -110,7 +110,6 @@ public class PlayerController : CreatureController
                 Managers.Object.MyPlayer.OnSkillConfirmed(skillPacket);
             }
 
-            //StartCoroutine(CoStartSkill());
             Debug.Log("스킬 코루틴 시작");
 
             CreateSkillMesh(keyCode);

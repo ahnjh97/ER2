@@ -12,9 +12,8 @@ using static UnityEngine.GraphicsBuffer;
 public class YukiController : MyPlayerController
 {
     float _dashDistance = 5f;
-    float _dashDuration = 0.2f;
 
-    private bool isDashing = false;
+    Vector3 _targetPos;
 
     protected override void Init()
     {
@@ -22,12 +21,17 @@ public class YukiController : MyPlayerController
         _attackRange = 1.5f;
     }
 
+    //protected override void UpdateController()
+    //{
+    //    base.UpdateController();
+    //}
+
     protected override void UpdateSkillKeyInput()
     {
-        if (IsKeyInput == false && Input.GetKeyDown(KeyCode.Q))
+        if (Input.GetKeyDown(KeyCode.Q))
         {
-            _isUseSkill = true;
-            _keyCode = KeyCode.Q;
+            _isSkillAtk = true;
+            Debug.Log($"평타 강화 : {_isSkillAtk}");
         }
         else if (IsKeyInput == false && Input.GetKeyDown(KeyCode.W))
         {
@@ -52,7 +56,7 @@ public class YukiController : MyPlayerController
 
     protected override void Skill_Q()
     {
-        PlayAnimation("SKILL_Q", 0.1f);
+        //PlayAnimation("SKILL_Q", 0.1f);
     }
 
     protected override void Skill_W()
@@ -75,92 +79,39 @@ public class YukiController : MyPlayerController
     #region Skill : E
     void Dash()
     {
-        Vector3 _targetPos = GetTargetPos(_dashDistance);
+        LookAtMouse();
+
+        Vector3 targetPos = GetTargetPos(_dashDistance);
+        NavMeshHit hit;
+
+        if (NavMesh.SamplePosition(GetTargetPos(_dashDistance), out hit, 0.5f, NavMesh.AllAreas))
+        {
+            _targetPos = hit.position;
+        }
+        else
+        {
+            if (GetReachablePosition(transform.position, targetPos, out hit) != Vector3.zero)
+            {
+                _targetPos = hit.position;
+            }
+        }
 
         StartCoroutine(CoMoveToTarget(_targetPos));
     }
 
     IEnumerator CoMoveToTarget(Vector3 targetPos)
     {
+        _agent.enabled = false;
+
         while (Vector3.Distance(transform.position, targetPos) > 0.05f)
         {
             transform.position = Vector3.MoveTowards(transform.position, targetPos, 15f * Time.deltaTime);
+            UpdateTransform();
             yield return null;
         }
 
-        transform.position = targetPos;
+        State = CreatureState.Idle;
+        _agent.enabled = true;
     }
-
-    //void Dash()
-    //{
-    //    Vector3 mousePos = Input.mousePosition;
-    //    mousePos.z = Camera.main.transform.position.y;
-    //    Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(mousePos);
-
-    //    Vector3 direction = (mouseWorld - transform.position);
-    //    direction.y = 0f;
-    //    direction.Normalize();
-
-    //    if (direction.sqrMagnitude > 0.001f)
-    //    {
-    //        transform.rotation = Quaternion.LookRotation(direction);
-    //    }
-
-    //    StartCoroutine(DashCoroutine(direction));
-    //}
-
-    //private IEnumerator DashCoroutine(Vector3 direction)
-    //{
-    //    isDashing = true;
-    //    _navMeshAgent.enabled = false;
-
-    //    Vector3 startPos = transform.position;
-    //    Vector3 rawEndPos = startPos + direction * dashDistance;
-    //    Vector3 endPos = rawEndPos;
-
-    //    // Collider 있는 벽 체크
-    //    if (CheckWall(startPos, rawEndPos, out Vector3 stopPos))
-    //    {
-    //        endPos = stopPos;
-    //    }
-    //    else
-    //    {
-    //        if (NavMesh.SamplePosition(rawEndPos, out NavMeshHit hit, 0.5f, NavMesh.AllAreas))
-    //            endPos = hit.position;
-    //        else
-    //            endPos = startPos;
-    //    }
-
-    //    // 실제 대시 이동
-    //    float elapsed = 0f;
-    //    while (elapsed < dashDuration)
-    //    {
-    //        transform.position = Vector3.Lerp(startPos, endPos, elapsed / dashDuration);
-    //        elapsed += Time.deltaTime;
-    //        yield return null;
-    //    }
-
-    //    transform.position = endPos;
-    //    _navMeshAgent.enabled = true;
-    //    isDashing = false;
-    //}
-
-    //// Collider 있는 벽 체크
-    //private bool CheckWall(Vector3 start, Vector3 end, out Vector3 stopPos)
-    //{
-    //    Vector3 dir = (end - start).normalized;
-    //    float dist = Vector3.Distance(start, end);
-
-    //    int dashWallMask = LayerMask.GetMask("Wall");
-
-    //    if (Physics.Raycast(start, dir, out RaycastHit hit, dist, dashWallMask))
-    //    {
-    //        stopPos = hit.point;
-    //        return true;
-    //    }
-
-    //    stopPos = end;
-    //    return false;
-    //}
     #endregion
 }

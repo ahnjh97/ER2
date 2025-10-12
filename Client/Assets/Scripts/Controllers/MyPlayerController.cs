@@ -17,6 +17,8 @@ public class MyPlayerController : PlayerController
     protected int _monsterMask;
     protected int _playerMask;
 
+    protected bool _isSkillAtk = false;
+
     // State
     public override CreatureState State
     {
@@ -301,6 +303,7 @@ public class MyPlayerController : PlayerController
                 if (Target != null)
                 {
                     transform.position = _finalPos;
+
                     if (!TryChangeToAttackState())
                     {
                         UpdateTargetPos();
@@ -393,17 +396,17 @@ public class MyPlayerController : PlayerController
 
             yield return null;
         }
-    }   
+    }
     #endregion
 
     #region State : Attack
-
     // 평타 반복 코루틴
     IEnumerator CoAttackLoop()
     {
         while (true)
         {
             string animName = (_attackIndex == 0) ? "ATTACK_1" : "ATTACK_2";
+
             PlayAnimation(animName, 0.1f);
 
             _attackIndex = 1 - _attackIndex;
@@ -425,10 +428,9 @@ public class MyPlayerController : PlayerController
 
             if (!_isAttackLoop)
             {
-                if(State != CreatureState.Skill)
+                if (State != CreatureState.Skill)
                     SetMovementState();
                 _attackRoutine = null;
-                Debug.Log($"평타 코루틴 끝");
 
                 StartCoroutine(CoComboResetTimer());
 
@@ -554,14 +556,34 @@ public class MyPlayerController : PlayerController
         return targetObject;
     }
 
+    // 평타 스킬
+    IEnumerator CoSkillAttack()
+    {
+        PlayAnimation("SKILL_Q", 0.1f);
+        State = CreatureState.Skill;
+
+        yield return new WaitForSeconds(1.5f);
+
+        SetMovementState();
+    }
+
     // 타겟이 있고, 평타 사거리 내라면 true 반환
     protected bool TryChangeToAttackState()
     {
         if (Target != null && Vector3.Distance(Target.transform.position, transform.position) <= _attackRange)
         {
-            State = CreatureState.Attack;
-            _isAttackLoop = true;
-            return true;
+            if (_isSkillAtk == true)
+            {
+                _isSkillAtk = false;
+                StartCoroutine(CoSkillAttack());
+            }
+            else
+            {
+                 State = CreatureState.Attack;
+                 _isAttackLoop = true;
+                 return true;
+            }
+
         }
 
         return false;

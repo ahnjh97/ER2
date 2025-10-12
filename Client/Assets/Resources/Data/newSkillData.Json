@@ -837,7 +837,7 @@
         "levels": {
           "1": {
             "damage": 40,
-            "cooldown": 15,
+            "cooldown": 3,
             "staminaCost": 50,
             "effects": [
               {
