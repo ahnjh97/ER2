@@ -4,32 +4,48 @@ using UnityEngine;
 using UnityEngine.UI;
 
 
-    public class UI_TargetingMark : MonoBehaviour
+public class UI_TargetingMark : MonoBehaviour
+{
+    private Coroutine _lifetimeCoroutine;
+    [SerializeField] private Image image;
+    private Canvas canvas; // SerializeField 제거
+
+    private Transform _currentTarget;
+    private bool _isTracking = false;
+
+    private void Awake()
     {
-        private Coroutine _lifetimeCoroutine;
-        [SerializeField] private Image image;
-        private Canvas canvas; // SerializeField 제거
+        if (image == null)
+            image = GetComponentInChildren<Image>();
 
-        private Transform _currentTarget;
-        private bool _isTracking = false;
-
-        private void Awake()
-        {
-            if (image == null)
-                image = GetComponentInChildren<Image>();
-
-            if (canvas == null)
-                canvas = GetComponentInParent<Canvas>();
-        }
+        if (canvas == null)
+            canvas = GetComponentInParent<Canvas>();
+    }
 
     private void Update()
+    {
+        
+    }
+
+    void OnEnable()
+    {
+        Canvas.willRenderCanvases += UpdatePosition;
+    }
+
+    void OnDisable()
+    {
+        image.enabled = false;
+        Canvas.willRenderCanvases -= UpdatePosition;
+    }
+
+    private void UpdatePosition()
     {
         if (_isTracking && _currentTarget != null)
         {
             if (canvas == null)
                 return;
 
-            Vector3 targetWorldPos = _currentTarget.position + new Vector3(0, 2.5f, 0);
+            Vector3 targetWorldPos = _currentTarget.position + new Vector3(0, 1.8f, 0);
             RectTransform rectTransform = transform as RectTransform;
 
             if (rectTransform == null)
@@ -47,9 +63,14 @@ using UnityEngine.UI;
 
                 image.enabled = true;
 
+                Vector2 screenDirection = Vector2.up;
+
+                float screenOffset = 115f;
+                Vector2 newTagScreenPos = new Vector2(screenPos.x, screenPos.y) + (screenDirection * screenOffset);
+
                 RectTransformUtility.ScreenPointToLocalPointInRectangle(
                     canvas.GetComponent<RectTransform>(),
-                    screenPos,
+                    newTagScreenPos,
                     null,
                     out Vector2 localPoint
                 );
@@ -85,6 +106,7 @@ using UnityEngine.UI;
             }
         }
     }
+
     public void Show(GameObject target, float duration, Action onComplete)
     {
         _currentTarget = target.transform;
