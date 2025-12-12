@@ -46,7 +46,8 @@ public class PickScene : BaseScene
         foreach (PickScenePlayerInfo pspi in Managers.Info._pspiList)
             Spawn(pspi);
 
-
+        GameObject loadingUI = GameObject.Find("LoadingUI");
+        loadingUI.SetActive(false);
         //Managers.Sound.Play("sound/bgm/BGM_Lobby", Define.Sound.Bgm);
     }
 

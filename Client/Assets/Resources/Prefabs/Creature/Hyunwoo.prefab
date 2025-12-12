@@ -1867,8 +1867,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 55e86d03b5ee90343aeb5c705c87e670, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IsHide: 0
+  _monsterMask:
+    serializedVersion: 2
+    m_Bits: 0
+  _playerMask:
+    serializedVersion: 2
+    m_Bits: 0
+  AGENT_SPEED_RATIO: 1.3
   Sound: {fileID: 0}
-  xRayIgnoreStencilID: 100
+  xRayGroupStencilID: 100
+  allyXRayColor: {r: 0.19182372, g: 0.539475, b: 1, a: 1}
+  enemyXRayColor: {r: 0.98742133, g: 0.27014345, b: 0.27014345, a: 1}
 --- !u!114 &7722490234451496993
 MonoBehaviour:
   m_ObjectHideFlags: 0

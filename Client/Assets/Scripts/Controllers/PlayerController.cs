@@ -900,7 +900,9 @@ public class PlayerController : CreatureController
     #endregion
 
     [Header("X-Ray Settings")]
-    [SerializeField] private int xRayGroupStencilID = 100; // 플레이어+무기 그룹 ID
+    [SerializeField] private int xRayGroupStencilID = 100;
+    [SerializeField] private Color allyXRayColor = new Color(0.3f, 0.6f, 1f, 1f);
+    [SerializeField] private Color enemyXRayColor = new Color(1f, 0.2f, 0.2f, 1f);
 
     void InitializeXRay()
     {
@@ -909,31 +911,39 @@ public class PlayerController : CreatureController
 
     void SetupPlayerWeaponXRay()
     {
-        // Player와 무기 모두 같은 ID 사용
-        SetXRayGroup(gameObject, xRayGroupStencilID);
+        bool isEnemy = IsEnemyTeam();
+        Color xrayColor = isEnemy ? enemyXRayColor : allyXRayColor;
+        SetXRayGroup(gameObject, xRayGroupStencilID, xrayColor);
 
         if (_eqipWeapon != null)
-            SetXRayGroup(_eqipWeapon, xRayGroupStencilID);
+            SetXRayGroup(_eqipWeapon, xRayGroupStencilID, xrayColor);
     }
 
     public void SetxRayFromPlayer(GameObject player)
     {
-        SetXRayGroup(player, xRayGroupStencilID);
+        // 중요: player 객체의 팀을 체크해야 함!
+        PlayerController playerScript = player.GetComponent<PlayerController>();
+        if (playerScript == null)
+            return;
+
+        bool isEnemy = IsEnemyTeam(playerScript);
+        Color xrayColor = isEnemy ? enemyXRayColor : allyXRayColor;
+
+        SetXRayGroup(player, xRayGroupStencilID, xrayColor);
     }
 
-    void SetXRayGroup(GameObject root, int stencilID)
+    void SetXRayGroup(GameObject root, int stencilID, Color xrayColor)
     {
         Renderer[] renderers = root.GetComponentsInChildren<Renderer>(true);
         foreach (Renderer renderer in renderers)
         {
-            // 중요: 머티리얼 인스턴스 배열을 가져와서 수정
             Material[] materials = renderer.materials;
 
             for (int i = 0; i < materials.Length; i++)
             {
                 Material mat = materials[i];
 
-                if ( mat.shader.name.Contains("Toon_CharacterNy"))
+                if (mat.shader.name.Contains("Toon_CharacterNy"))
                 {
                     if (mat.HasProperty("_StencilRef"))
                     {
@@ -944,30 +954,44 @@ public class PlayerController : CreatureController
 
                         if (mat.HasProperty("_OccludedColor"))
                         {
-                            Color occludedColor = mat.GetColor("_OccludedColor");
-                            occludedColor.a = 0.5f;
-                            mat.SetColor("_OccludedColor", occludedColor);
+                            mat.SetColor("_OccludedColor", xrayColor);
+                            Debug.Log($"Set X-Ray: {renderer.gameObject.name} = {xrayColor}");
                         }
-
-                        //Debug.Log($"Set X-Ray for {renderer.gameObject.name}: StencilRef={stencilID}");
                     }
                 }
             }
 
-            // 변경된 머티리얼 배열을 다시 할당
             renderer.materials = materials;
         }
+    }
+
+    bool IsEnemyTeam()
+    {
+        if (Managers.Object.MyPlayer == null || ObjInfo?.Player == null)
+            return false;
+
+        return Managers.Object.MyPlayer.ObjInfo.Player.Team != ObjInfo.Player.Team;
+    }
+
+    bool IsEnemyTeam(PlayerController targetPlayer)
+    {
+        if (Managers.Object.MyPlayer == null ||
+            targetPlayer == null ||
+            targetPlayer.ObjInfo?.Player == null)
+            return false;
+
+        return Managers.Object.MyPlayer.ObjInfo.Player.Team != targetPlayer.ObjInfo.Player.Team;
     }
 
     void OnWeaponEquipped(GameObject newWeapon)
     {
         if (newWeapon != null)
         {
-            SetXRayGroup(newWeapon, xRayGroupStencilID);
+            bool isEnemy = IsEnemyTeam();
+            Color xrayColor = isEnemy ? enemyXRayColor : allyXRayColor;
+            SetXRayGroup(newWeapon, xRayGroupStencilID, xrayColor);
         }
     }
-
-
     public void SyncPosFromServer(S_Move movePacket)
     {
         if (_agent == null || !_agent.isOnNavMesh)

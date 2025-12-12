@@ -36,7 +36,7 @@ public class LoadingUIController : MonoBehaviour
             //Debug.LogError("Sprite slicing failed");
         }
 
-        if (Managers.Scene.CurrentScene is GameScene scene)
+        if (Managers.Scene.CurrentScene is GameScene scene || Managers.Scene.CurrentScene is PickScene pickScene)
         {
             SetProgress(1);
             StartAnimation();

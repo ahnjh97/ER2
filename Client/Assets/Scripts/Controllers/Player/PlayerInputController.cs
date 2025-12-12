@@ -498,7 +498,7 @@ public class PlayerInputController : MonoBehaviour
 
     public void GetEmoticonCommand()
     {
-        if (Input.GetKeyDown(KeyCode.T))
+        if (Input.GetKeyDown(KeyCode.T) && !Input.GetKey(KeyCode.LeftControl))
         {
             if(_player.Emoticon.TryUseEmoticon() == EmoticonUseResult.Fail_WindowLimit)
                 _player.UI.ActionNotReady.Show(Emoticon_Desc_NotReady);
