@@ -20,8 +20,8 @@ public class NetworkManager
 	{
         // DNS (Domain Name System)
 
-        //IPAddress ipAddr = IPAddress.Loopback;
-        IPAddress ipAddr = IPAddress.Parse("129.154.59.53"); // Public IP
+        IPAddress ipAddr = IPAddress.Loopback;
+        //IPAddress ipAddr = IPAddress.Parse("129.154.59.53"); // Public IP
         IPEndPoint endPoint = new IPEndPoint(ipAddr, 7777);
 
 		Connector connector = new Connector();

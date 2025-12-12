@@ -65,7 +65,7 @@ public class Abigail_AttackState : Player_AttackState
 
         float animSpeed = originalTime / targetPeriod;
         if (IsPassiveAttack)
-            animSpeed *= 1.15f;
+            animSpeed *= 1.3f;
 
         _swingStartUtc = now;
         _hitMomentUtc = now.AddSeconds(WindupSeconds / animSpeed);
