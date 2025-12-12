@@ -66,6 +66,8 @@ public sealed class Yuki_D : SkillHandlerBase
 
         p.SendYukiSkillEffect(SkillEffectType.WpSkill);
         SendSkillConfirmPacket(p);
+
+        p.Room.Push(p.Room.BroadcastAbigailSound, p, AbigailSound.YukiWeaponSkill1, 1f);
     }
 
     public override void OnHit(Player p, SkillContext ctx)
@@ -102,6 +104,11 @@ public sealed class Yuki_D : SkillHandlerBase
 
                 if (_requestId == _commitId)
                 {
+                    if (_dashElapsed == 0f)
+                    {
+                        p.Room.Push(p.Room.BroadcastAbigailSound, p, AbigailSound.YukiWeaponSkill2, 1f);
+                    }
+
                     _dashElapsed += TimeUtil.Instance.DeltaTime;
 
                     if (_dashElapsed < _dashDuration)

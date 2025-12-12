@@ -94,6 +94,8 @@
     "YukiRdebuff": [ "fx/Yuki_Skill04_Debuff" ],
     "YukiRdebuffHit": [ "fx/Yuki_Skill04_Debuff_Hit" ],
     "YukiRend": [ "fx/Yuki_Skill04_End" ],
+    "YukiWeaponSkill1": [ "fx/TwoHandSword_WeaponSkill" ],
+    "YukiWeaponSkill2": [ "fx/WeaponSkill_TwoHandSword_Attack" ],
 
     "YukiVictory": [
       "voice/Yuki_victory_1_ko",
