@@ -185,6 +185,9 @@ public class MyPlayerController : PlayerController
     public override void OnDead()
     {
         base.OnDead();
+
+        if(_input is TheodoreInputController)
+            (_input as TheodoreInputController).OnDead();
     }
     // 서버 응답 전달
     public void OnServerUpdate(S_MoveSync packet) => _view.OnMoveSync(packet);

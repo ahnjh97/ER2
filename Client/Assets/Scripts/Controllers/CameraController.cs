@@ -225,29 +225,45 @@ public class CameraController : MonoBehaviour
     {
         Vector3 startPosition = transform.position;
         Quaternion startRotation = transform.rotation;
-
-        const float ZOOM_DURATION = 1.0f;
-        const float STOPPING_DISTANCE = 0.01f;
-
+        const float ZOOM_DURATION = 0.8f;
         float elapsed = 0f;
 
-        while (Vector3.Distance(transform.position, _originalPosition) > STOPPING_DISTANCE)
+        Transform playerTransform = Managers.Object.MyPlayer.transform;
+        Vector3 finalTargetOffset = _originalDelta.normalized * _currentZoom;
+
+        while (elapsed < ZOOM_DURATION)
         {
             elapsed += Time.deltaTime;
 
             float t = elapsed / ZOOM_DURATION;
             float smoothT = Mathf.SmoothStep(0f, 1f, t);
 
-            transform.position = Vector3.Lerp(startPosition, _originalPosition, smoothT);
-            transform.rotation = Quaternion.Slerp(startRotation, _originalRotation, smoothT);
+            Vector3 targetPosition = playerTransform.position + finalTargetOffset;
+
+            transform.position = Vector3.Lerp(
+                startPosition,  
+                targetPosition,
+                smoothT       
+            );
+
+            // 3. 회전 보간
+            transform.rotation = Quaternion.Slerp(
+                startRotation,
+                _originalRotation,
+                smoothT
+            );
 
             yield return null;
         }
 
-        transform.position = _originalPosition;
+        Vector3 finalPosition = playerTransform.position + finalTargetOffset;
+
+        transform.position = finalPosition;
         transform.rotation = _originalRotation;
+
         _delta = _originalDelta;
         _bSkillCam = false;
+        _isLerpComplete = true;
     }
     #endregion
 }

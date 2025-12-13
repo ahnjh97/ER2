@@ -9,6 +9,7 @@ using UnityEngine.AI;
 
 public class PlayerController : CreatureController
 {
+    public bool IsRespawned = false;
     bool _isKeyInput = false;
     int _atkCount = 1;
     int _maxAtkCount = 2;
@@ -376,7 +377,7 @@ public class PlayerController : CreatureController
     {
         base.UpdateController();
         MultiKillTimer();
-
+    
         if (Id != Managers.Object.MyPlayer.Id)
         {
             float dist = Vector3.Distance(transform.position, _serverPos);
@@ -392,7 +393,16 @@ public class PlayerController : CreatureController
             }
         }
     }
- 
+    public void RespawnStart()
+    {
+        StartCoroutine(RespawnSce());
+    }
+    private IEnumerator RespawnSce()
+    {
+        IsRespawned = true;
+        yield return new WaitForSeconds(0.2f);
+        IsRespawned = false;
+    }
     protected virtual void CheckUpdatedFlag() { }
 
     public override void OnDamaged()

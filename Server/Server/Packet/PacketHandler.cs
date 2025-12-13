@@ -1,10 +1,10 @@
-﻿using System;
-using Google.Protobuf;
+﻿using Google.Protobuf;
 using Google.Protobuf.Protocol;
 using Server;
 using Server.Data;
 using Server.Game;
 using ServerCore;
+using System;
 using static Server.Data.DataUtils;
 
 class PacketHandler
@@ -41,19 +41,19 @@ class PacketHandler
     }
 
     public static void C_SkillHandler(PacketSession session, IMessage packet)
-	{
-  //      C_Skill skillPacket = packet as C_Skill;
-  //      ClientSession clientSession = session as ClientSession;
+    {
+        //      C_Skill skillPacket = packet as C_Skill;
+        //      ClientSession clientSession = session as ClientSession;
 
-  //      Player player = clientSession.MyPlayer;
-  //      if (player == null)
-  //          return;
+        //      Player player = clientSession.MyPlayer;
+        //      if (player == null)
+        //          return;
 
-  //      GameRoom room = player.Room;
-  //      if (room == null)
-  //          return;
+        //      GameRoom room = player.Room;
+        //      if (room == null)
+        //          return;
 
-		//room.Push(room.HandleSkill, player, skillPacket);
+        //room.Push(room.HandleSkill, player, skillPacket);
     }
 
     public static void C_AnimHandler(PacketSession session, IMessage packet)
@@ -94,7 +94,7 @@ class PacketHandler
         clientSession.MyCharacter = c_charPacket.CharType;
 
         PickRoom room = RoomManager.Instance.Find(clientSession.CurRoom) as PickRoom;
-        if(room == null || room.IsReady(c_charPacket.PickIdx)) 
+        if (room == null || room.IsReady(c_charPacket.PickIdx))
             return;
 
         S_Character s_charPacket = new S_Character();
@@ -110,7 +110,7 @@ class PacketHandler
         clientSession.TraitType = c_traitPacket.TraitType;
 
         PickRoom room = RoomManager.Instance.Find(clientSession.CurRoom) as PickRoom;
-        if(room == null || room.IsReady(c_traitPacket.PickIdx)) 
+        if (room == null || room.IsReady(c_traitPacket.PickIdx))
             return;
 
         room.Push(room.SetTrait, c_traitPacket.TraitType, c_traitPacket.PickIdx);
@@ -143,7 +143,7 @@ class PacketHandler
         clientSession.WeaponType = c_weaponPacket.WeaponType;
 
         PickRoom room = RoomManager.Instance.Find(clientSession.CurRoom) as PickRoom;
-        if(room == null || room.IsReady(c_weaponPacket.PickIdx)) 
+        if (room == null || room.IsReady(c_weaponPacket.PickIdx))
             return;
 
         room.Push(room.SetWeapon, c_weaponPacket.WeaponType, c_weaponPacket.PickIdx);
@@ -209,8 +209,8 @@ class PacketHandler
             return;
         var req = (C_Attack)packet;
 
-       player.Room.Push(player.Room.HandleAttack, player, req);
-     }
+        player.Room.Push(player.Room.HandleAttack, player, req);
+    }
 
     public static void C_SetMoveTargetHandler(PacketSession session, IMessage packet)
     {
