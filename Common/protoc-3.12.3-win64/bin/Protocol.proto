@@ -463,6 +463,8 @@ enum AbigailSound{
 	YukiVictory = 43;
 	YukiRest = 44;
 	YukiKill = 45;
+	YukiWeaponSkill1 = 46;
+	YukiWeaponSkill2 = 47;
 }
 
 enum AbigailFx{
