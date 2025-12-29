@@ -80,7 +80,6 @@ namespace Server.Game
                 {
                     channel = RetracePath(startNode, currentNode);
 
-                    //  사용한 노드만 Parent 정리
                     foreach (var node in visited)
                         node.Parent = null;
 
@@ -92,16 +91,16 @@ namespace Server.Game
 
                 foreach (var neighbor in currentNode.Neighbors)
                 {
-                    float tentativeGScore = currentGScore + Vector3.Distance(currentNode.Center, neighbor.Center);
+                    float tentativeGScore = currentGScore + Vector3.Distance(currentNode.Center, neighbor.Center); // 현재까지 온 거리+ 현재 노드에서 이웃 노드까지의 직선 거리
 
-                    if (_gScore.TryGetValue(neighbor.Index, out float neighborG) && tentativeGScore >= neighborG)
+                    if (_gScore.TryGetValue(neighbor.Index, out float neighborG) && tentativeGScore >= neighborG) // 더 빠른 길이 있었는가?
                         continue;
 
                     neighbor.Parent = currentNode;
                     _gScore[neighbor.Index] = tentativeGScore;
 
                     float hScore = Vector3.Distance(neighbor.Center, targetNode.Center);
-                    float newFScore = tentativeGScore + hScore;
+                    float newFScore = tentativeGScore + hScore; // 현재 노드까지 + 휴리스틱 
                     _open.Push(neighbor, newFScore);
                 }
             }
@@ -112,7 +111,6 @@ namespace Server.Game
             return PathState.NoPath;
         }
 
-        // 결국에는 장애물도 판단해야하는데......
         const float MAX_SEARCH_DIST_SQ = 20f * 20f;
         public Node FindNearestNode(Vector3 position)
         {
@@ -185,7 +183,6 @@ namespace Server.Game
         {
             gate = new Gate();
 
-            //  Span 사용 (할당 없음)
             int triAStart = nodeA.Index * 3;
             int triBStart = nodeB.Index * 3;
 
@@ -193,11 +190,9 @@ namespace Server.Game
             int common2 = -1;
             int foundCount = 0;
 
-            //  중첩 반복 최적화
             for (int i = 0; i < 3 && foundCount < 2; i++)
             {
                 int vA = _navMeshData.triangles[triAStart + i];
-
                 for (int j = 0; j < 3; j++)
                 {
                     int vB = _navMeshData.triangles[triBStart + j];
@@ -224,7 +219,6 @@ namespace Server.Game
                 gate.Right = v2;
                 return PathState.PathFound;
             }
-
             return PathState.EdgeInvalid;
         }
     }

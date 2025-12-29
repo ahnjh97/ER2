@@ -1161,6 +1161,7 @@ namespace Server.Game
 
            // A forward 
            float projCenterA1 = Vector2.Dot(toTarget, forwardA);
+            // 내적의 경우 음수가 나올 수 있기 때문에
            float projRadiusA1 = halfHeightA + MathF.Abs(Vector2.Dot(forwardA, forwardB)) * halfHeightB + MathF.Abs(Vector2.Dot(forwardA, rightB)) * halfWidthB;
            if (MathF.Abs(projCenterA1) > projRadiusA1) return false;
 

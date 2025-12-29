@@ -96,7 +96,7 @@ public class FXManager : MonoBehaviour
     {
         public GameObject Prefab;
         public Transform Root;
-        public Queue<GameObject> Available = new Queue<GameObject>();
+        public Stack<GameObject> Available = new Stack<GameObject>();
         public HashSet<GameObject> InUse = new HashSet<GameObject>();
     }
 
@@ -129,7 +129,7 @@ public class FXManager : MonoBehaviour
             GameObject obj = Instantiate(prefab, pool.Root);
             obj.name = prefab.name;
             obj.SetActive(false);
-            pool.Available.Enqueue(obj);
+            pool.Available.Push(obj);
         }
 
         _pools.Add(prefabId, pool);
@@ -149,7 +149,7 @@ public class FXManager : MonoBehaviour
 
         if (pool.Available.Count > 0)
         {
-            obj = pool.Available.Dequeue();
+            obj = pool.Available.Pop();
         }
         else
         {
@@ -189,7 +189,7 @@ public class FXManager : MonoBehaviour
             }
 
             obj.transform.SetParent(pool.Root, false);
-            pool.Available.Enqueue(obj);
+            pool.Available.Push(obj);
 
             CreateEffect(obj);
 

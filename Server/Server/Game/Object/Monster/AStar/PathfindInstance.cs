@@ -74,17 +74,12 @@ namespace Server.Game
         private static NavMeshExportData _navMeshData;
         private List<Node> _triangleNodes;
 
-        private Dictionary<(Vector3, Vector3), (Deque<Node>, long)> _pathCache;
-        private const long CACHE_DURATION_MS = 5000; // 5초
-
         List<Gate> _channel;
          Deque<Node> _path;
         readonly Funnel _funnel;
         readonly Pathfinding _astar;
 
         #region Load Navi
-        
-
         public void Initialize()
         {
             string basePath = ConfigManager.Config.dataPaths["player"];
@@ -187,7 +182,6 @@ namespace Server.Game
         #endregion
         public PathfindInstance(int idx) : this()
         {
-            _pathCache = new Dictionary<(Vector3, Vector3), (Deque<Node>, long)>();
             _path = new Deque<Node>();
             _channel = new List<Gate>();
 
@@ -197,18 +191,6 @@ namespace Server.Game
         }
         public PathState FindPath(Vector3 start, Vector3 end, ref Deque<Node> resultPath)
         {
-            // 캐시 저장이었는데 캐시 미스가 더 나서 비효율적이다.
-            //var key = (RoundPosition(start), RoundPosition(end));
-            //if (_pathCache.TryGetValue(key, out var cached))
-            //{
-            //    long now = Environment.TickCount64;
-            //    if (now - cached.Item2 < CACHE_DURATION_MS)
-            //    {
-            //        resultPath = cached.Item1;
-            //        return PathState.PathFound;
-            //    }
-            //}
-
             Clear();
 
             var result = _astar.PathSearch(start, end, out _channel);
@@ -216,7 +198,6 @@ namespace Server.Game
             {
                 _funnel.GetFunnelPath(_channel, start, end, out _path);
                 resultPath = _path;
-               // _pathCache[key] = (_path, Environment.TickCount64);
             }
 
             return result;

@@ -8,10 +8,6 @@ namespace Server.Game
 {
     struct Funnel
     {
-        //readonly Deque<Node> _funnel;
-        //Node _apex;
-        //Deque<Node> _output;
-
         public void Clear()
         {
         }
@@ -58,7 +54,7 @@ namespace Server.Game
                 if (Cross(new Vector2(portalLeft.X - apex.X, portalLeft.Z - apex.Z),
                           new Vector2(currentLeft.X - apex.X, currentLeft.Z - apex.Z)) <= 0)
                 {
-                    if (Cross(new Vector2(currentLeft.X - apex.X, currentLeft.Z - apex.Z),
+                    if (Cross(new Vector2(currentLeft.X - apex.X, currentLeft.Z - apex.Z), // 경로가 꼬였는 지 확인
                               new Vector2(portalRight.X - apex.X, portalRight.Z - apex.Z)) > 0)
                     {
                         output.AddToBack(new Node(portalRight, Node.NodeType.Point)); 
