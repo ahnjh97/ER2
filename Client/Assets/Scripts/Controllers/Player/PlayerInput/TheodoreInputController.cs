@@ -20,7 +20,6 @@ public class TheodoreInputController : PlayerInputController
     #endregion
 
     private KeyCode? _currentSkillKey = null;
-    private Coroutine _cancelCoroutine = null;
     private Coroutine _skillCoroutine = null;
 
     // Skill D - Sniper shot
@@ -74,6 +73,31 @@ public class TheodoreInputController : PlayerInputController
         return target - dir * stop;
     }
 
+    public void OnDead()
+    {
+        if (_skillCoroutine != null)
+        {
+            StopCoroutine(_skillCoroutine);
+            _skillCoroutine = null;
+        }
+
+        _currentSkillKey = null;
+        _SniperShotIdx = 0;
+        _elapsedTime = 0f;
+
+        CameraController cc = Camera.main.gameObject.GetComponent<CameraController>();
+        if (cc != null)
+        {
+            cc.EndAimMode();
+        }
+
+        _player.Indicator.DisableIndicator(_player.ObjInfo.Player.CharType, KeyCode.F1);
+        if (_currentSkillKey.HasValue)
+        {
+            _player.Indicator.DisableIndicator(_player.ObjInfo.Player.CharType, _currentSkillKey.Value);
+        }
+        _player.UI.PlayerInterface.StopChargingBar();
+    }
 
     protected override void ChargeSkill(KeyCode key)
     {
@@ -258,44 +282,11 @@ public class TheodoreInputController : PlayerInputController
 
         _elapsedTime = 0;
         _currentSkillKey = null;
-
-        StartCoroutine(CancelCooldown(0.5f));
+        _skillCoroutine = null;
     }
 
 #endregion
 
-    #region 이동 처리
-    public override C_SetMoveTarget GetSetMoveTarget()
-    {
-        if (_cancelCoroutine != null)
-            return null;
-
-        if (_currentSkillKey != null &&
-            _currentSkillKey != KeyCode.Q &&
-            Input.GetKey((KeyCode)_currentSkillKey) && 
-            Input.GetMouseButton(1))
-        {
-            _cancelCoroutine = StartCoroutine(CancelCooldown());
-            return null;
-        }
-
-        if (_currentSkillKey != null && (KeyCode)_currentSkillKey == KeyCode.D && Input.GetMouseButton(1))
-        {
-            _currentSkillKey = null;
-            _cancelCoroutine = StartCoroutine(CancelCooldown(0.9f));
-            return null;
-        }
-        return base.GetSetMoveTarget();
-    }
-
-    private IEnumerator CancelCooldown(float duration = CANCEL_DURATION)
-    {
-        yield return new WaitForSeconds(duration);
-
-        _cancelCoroutine = null;
-        _skillCoroutine = null;
-    }
-    #endregion
 
     #region Packet
     private void SendSkillInputPacket(KeyCode key, bool checkSkillState = true)

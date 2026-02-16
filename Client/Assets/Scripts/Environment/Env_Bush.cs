@@ -22,7 +22,6 @@ public class Env_Bush : EnvController
     Dictionary<int, Coroutine> _delayedVisibleCoroutines = new Dictionary<int, Coroutine>();
 
     protected override void Init() => base.Init();
-
     void FixedUpdate()
     {
         CheckBushStatus();
@@ -91,7 +90,7 @@ public class Env_Bush : EnvController
                 GameObject newGo = Managers.Object.FindById(newId);
                 PlayerController pc = newGo.GetComponentInChildren<PlayerController>();
 
-                if (pc != null && pc.State == CreatureState.Dead)
+                if (pc != null && (pc.State == CreatureState.Dead || pc.IsRespawned))
                     continue;
 
                 if (newGo != null && newGo.TryGetComponent<PlayerController>(out PlayerController newPc))

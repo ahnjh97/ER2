@@ -436,6 +436,7 @@ class PacketHandler
         if (go == null)
             return;
 
+        PlayerController pc = go.GetComponentInChildren<PlayerController>();
         if (Managers.Object.MyPlayer.Id == respawnPacket.ObjectId)
         {
             Managers.Object.MyPlayer.OnServerUpdate(respawnPacket);
@@ -443,7 +444,6 @@ class PacketHandler
         }
         else
         {
-            PlayerController pc = go.GetComponentInChildren<PlayerController>();
             if (pc != null)
             {
                 pc.OnRespawn(respawnPacket);
@@ -453,6 +453,10 @@ class PacketHandler
                 Managers.Object.MyPlayer.View.TargetId = 0;
             }
         }
+
+        // Todo* 급조
+        if (pc != null)
+            pc.RespawnStart();
     }
 
     public static void S_SkillLevelUpHandler(PacketSession session, IMessage packet)
