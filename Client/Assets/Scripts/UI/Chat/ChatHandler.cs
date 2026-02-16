@@ -21,7 +21,7 @@ public class ChatHandler : MonoBehaviour
     private ChatType chatType;
 
     // 메시지 큐
-    private static Queue<(int playerId, int teamId, string playerName, string message, ChatType chatType, CharacterType charType)> messageQueue = new Queue<(int, int, string, string, ChatType, CharacterType)>();
+    private Queue<(int playerId, int teamId, string playerName, string message, ChatType chatType, CharacterType charType)> messageQueue = new Queue<(int, int, string, string, ChatType, CharacterType)>();
 
     private void Awake()
     {

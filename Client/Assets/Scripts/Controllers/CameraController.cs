@@ -18,14 +18,13 @@ public class CameraController : MonoBehaviour
     int _currentStep = 0;
     float _currentZoom = 0f;
     float _targetZoom = 0f;
-    bool _isLerpComplete = true;
+    bool _isAngleLerp = true;
     float _zoomSpeed = 0f;
     float _lerpSpeed = 0f;
 
     [SerializeField]
     GameObject _player = null;
     private Camera _mainCamera;
-    private Camera _mapCamera;
     private Camera _uiCamera;
 
     public Action LateUpdateAction = null;
@@ -96,18 +95,15 @@ public class CameraController : MonoBehaviour
     private void DefaultMode()
     {
         float scroll = Input.GetAxis("Mouse ScrollWheel");
-        if (scroll < 0f)
+
+        if (scroll != 0f)
         {
-            _currentStep = Mathf.Max(_currentStep - 1, 0);
-            _targetZoom = _zoomSteps[_currentStep];
-        }
-        else if (scroll > 0f)
-        {
-            _currentStep = Mathf.Min(_currentStep + 1, _zoomSteps.Length - 1);
+            _currentStep = scroll > 0f ? Mathf.Min(_currentStep + 1, _zoomSteps.Length - 1) : Mathf.Max(_currentStep - 1, 0);
+
             _targetZoom = _zoomSteps[_currentStep];
         }
 
-        if (_isLerpComplete)
+        if (_isAngleLerp)
         {
             _currentZoom = Mathf.MoveTowards(_currentZoom, _targetZoom, _zoomSpeed * Time.deltaTime);
         }
@@ -124,10 +120,7 @@ public class CameraController : MonoBehaviour
             Vector3 targetDelta = (_currentZoom <= _lastZoom) ? _nearDelta : _farDelta;
             _delta = Vector3.MoveTowards(_delta, targetDelta, _lerpSpeed * Time.deltaTime);
 
-            if (Vector3.Distance(_delta, targetDelta) < 0.01f)
-                _isLerpComplete = true;
-            else
-                _isLerpComplete = false;
+            _isAngleLerp = Vector3.Distance(_delta, targetDelta) < 0.01f;
 
             Vector3 zoomedOffset = _delta.normalized * _currentZoom;
             transform.position = _player.transform.position + zoomedOffset;

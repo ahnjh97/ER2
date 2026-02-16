@@ -4,10 +4,10 @@ using UnityEngine.UI;
 
 public class YukiFlower : MonoBehaviour, IEffect
 {
-    [SerializeField] private Image image;
+    [SerializeField] private Image _image;
 
     [SerializeField] private Sprite[] _frames;
-    [SerializeField] private bool autoHide = true;
+    [SerializeField] private bool _autoHide = true;
 
     private Coroutine _coAnimRoutine;
 
@@ -27,7 +27,7 @@ public class YukiFlower : MonoBehaviour, IEffect
         }
             
 
-        image.enabled = false;
+        _image.enabled = false;
     }
 
     public void Play()
@@ -43,19 +43,19 @@ public class YukiFlower : MonoBehaviour, IEffect
 
     private IEnumerator CoPlayAnimation(float duration)
     {
-        image.enabled = true;
+        _image.enabled = true;
 
         float frameTime = duration / _frames.Length;
 
         for (int i = 0; i < _frames.Length; i++)
         {
-            image.sprite = _frames[i];
+            _image.sprite = _frames[i];
             yield return new WaitForSeconds(frameTime);
         }
 
-        if (autoHide)
+        if (_autoHide)
         {
-            image.enabled = false;
+            _image.enabled = false;
         }
 
         _coAnimRoutine = null;
