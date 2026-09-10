@@ -284,88 +284,103 @@ namespace Server.Game
         void CheckPlayerHit(ConcurrentDictionary<int, ConcurrentDictionary<int, Player>> teams, Dictionary<int, Dictionary<int, float>> damageDict,
             List<Hitbox> hitSoundList)
         {
-            foreach (var nestedKvp in _hitboxDict)
+            var hitPlayers = CollisionTargetPool<Player>.Rent();
+            try
             {
-                int ownerId = nestedKvp.Key;
-                HashSet<Hitbox> hitboxes = nestedKvp.Value;
-                if (hitboxes.Count == 0)
-                    continue;
-
-                int myTeam = ObjectManager.Instance.GetTeam(ownerId);
-
-                foreach (var hitbox in hitboxes)
+                foreach (var nestedKvp in _hitboxDict)
                 {
-                    if (CurTick < hitbox.StartTick || CurTick > hitbox.EndTick)
+                    int ownerId = nestedKvp.Key;
+                    HashSet<Hitbox> hitboxes = nestedKvp.Value;
+                    if (hitboxes.Count == 0)
                         continue;
 
-                    List<Player> hitPlayers = new List<Player>();
+                    int myTeam = ObjectManager.Instance.GetTeam(ownerId);
 
-                    foreach (var teamKvp in teams)
+                    foreach (var hitbox in hitboxes)
                     {
-                        int teamId = teamKvp.Key;
-                        if (teamId == myTeam)
-                        {
-                            bool isBusy = (hitbox.Creature.Info.Player.CharType == CharacterType.Theodore && hitbox.KeyCode == KeyCode.R);
-
-                            HandleAllyHit(hitbox, teamKvp.Value, isBusy);
+                        if (CurTick < hitbox.StartTick || CurTick > hitbox.EndTick)
                             continue;
-                        }                            
-                        HandleCollision<Player>(hitbox, teamKvp.Value, hitPlayers, damageDict);
-                    }
 
-                    if(hitPlayers.Count > 0)
-                    {
-                        if(hitbox.CharType == CharacterType.Rozzi)
+                        hitPlayers.Clear();
+
+                        foreach (var teamKvp in teams)
                         {
-                            if (HandleRozziRHitbox(hitbox, hitPlayers, ownerId, isPlayerTarget: true))
+                            int teamId = teamKvp.Key;
+                            if (teamId == myTeam)
+                            {
+                                bool isBusy = (hitbox.Creature.Info.Player.CharType == CharacterType.Theodore && hitbox.KeyCode == KeyCode.R);
+
+                                HandleAllyHit(hitbox, teamKvp.Value, isBusy);
                                 continue;
+                            }
+                            HandleCollision<Player>(hitbox, teamKvp.Value, hitPlayers, damageDict);
                         }
 
-                        HandleDamage<Player>(hitbox, hitPlayers, damageDict);
-                        HandleStatusEffects<Player>(hitbox, hitPlayers);
-                        if (hitbox.TryAddToSoundList())
-                            hitSoundList.Add(hitbox);
+                        if(hitPlayers.Count > 0)
+                        {
+                            if(hitbox.CharType == CharacterType.Rozzi)
+                            {
+                                if (HandleRozziRHitbox(hitbox, hitPlayers, ownerId, isPlayerTarget: true))
+                                    continue;
+                            }
+
+                            HandleDamage<Player>(hitbox, hitPlayers, damageDict);
+                            HandleStatusEffects<Player>(hitbox, hitPlayers);
+                            if (hitbox.TryAddToSoundList())
+                                hitSoundList.Add(hitbox);
+                        }
                     }
                 }
+            }
+            finally
+            {
+                CollisionTargetPool<Player>.Return(hitPlayers);
             }
         }
 
         void CheckHit<T>(IDictionary<int, T> targets, Dictionary<int, Dictionary<int, float>> damageDict,
             List<Hitbox> hitSoundList) where T : GameObject, new()
         {
-            foreach (var nestedKvp in _hitboxDict)
+            var hitTargets = CollisionTargetPool<T>.Rent();
+            try
             {
-                int ownerId = nestedKvp.Key;
-                HashSet<Hitbox> hitboxes = nestedKvp.Value;
-                if (hitboxes.Count == 0)
-                    continue;
-              
-                foreach (var hitbox in hitboxes)
+                foreach (var nestedKvp in _hitboxDict)
                 {
-                    if (CurTick < hitbox.StartTick || CurTick > hitbox.EndTick)
+                    int ownerId = nestedKvp.Key;
+                    HashSet<Hitbox> hitboxes = nestedKvp.Value;
+                    if (hitboxes.Count == 0)
                         continue;
 
-                    List<T> hitTargets = new List<T>();
-
-                    HandleCollision<T>(hitbox, targets, hitTargets, damageDict);
-
-                    if (hitTargets.Count > 0)
+                    foreach (var hitbox in hitboxes)
                     {
-                        if (hitbox.CharType == CharacterType.Rozzi)
-                        {
-                            if (HandleRozziRHitbox<T>(hitbox, hitTargets, ownerId, isPlayerTarget: false))
-                                continue;
-                        }
+                        if (CurTick < hitbox.StartTick || CurTick > hitbox.EndTick)
+                            continue;
 
-                        HandleDamage<T>(hitbox, hitTargets, damageDict);
-                        HandleStatusEffects<T>(hitbox, hitTargets);
-                        if (hitbox.TryAddToSoundList())
-                            hitSoundList.Add(hitbox);
+                        hitTargets.Clear();
+
+                        HandleCollision<T>(hitbox, targets, hitTargets, damageDict);
+
+                        if (hitTargets.Count > 0)
+                        {
+                            if (hitbox.CharType == CharacterType.Rozzi)
+                            {
+                                if (HandleRozziRHitbox<T>(hitbox, hitTargets, ownerId, isPlayerTarget: false))
+                                    continue;
+                            }
+
+                            HandleDamage<T>(hitbox, hitTargets, damageDict);
+                            HandleStatusEffects<T>(hitbox, hitTargets);
+                            if (hitbox.TryAddToSoundList())
+                                hitSoundList.Add(hitbox);
+                        }
                     }
                 }
             }
+            finally
+            {
+                CollisionTargetPool<T>.Return(hitTargets);
+            }
         }
-
 
         void HandleCollision<T>(Hitbox hitbox, IDictionary<int, T> targets, List<T> hitTargets, Dictionary<int, Dictionary<int, float>> damageDict) where T : GameObject, new()
         {
@@ -924,7 +939,7 @@ namespace Server.Game
                         if (effect.type == "OnCollisionSingleTarget")
                             player.Room.Push(player.Room.CallOnCollision, player, FindNearestTarget(hitbox, hitTargets), effect);
                         else if(effect.type == "OnCollisionMultiTarget")
-                            player.Room.Push(player.Room.CallOnCollision, player, hitTargets, effect);
+                            PooledCollisionCallback.Queue(player.Room, player, hitTargets, effect);
                         else
                             player.Room.Push(player.AddStatusEffect, effect);
                         break;
