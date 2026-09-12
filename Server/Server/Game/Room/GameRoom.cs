@@ -327,14 +327,18 @@ namespace Server.Game
 
             if (type == GameObjectType.Player)
             {
-                Player player = gameObject as Player;
+                if (gameObject is not Player player)
+                    return;
 
-                _players.TryAdd(gameObject.Id, player);
+                // 이미 입장한 플레이어는 중복 초기화하지 않음
+                if (!_players.TryAdd(player.Id, player))
+                    return;
                 player.Info.Player.Team = team;
                 player.Info.Player.Weapon = FindWeapon(player.Info.Player.CharType);
                 player.WeaponAttackRange = DataManager.WeaponDict[player.Info.Player.Weapon].Range;
 
-                var teamPlayers = _teams.GetOrAdd(player.Info.Player.Team, new ConcurrentDictionary<int, Player>());
+                var teamPlayers = _teams.GetOrAdd(player.Info.Player.Team,
+                    static _ => new ConcurrentDictionary<int, Player>());
                 teamPlayers.TryAdd(player.Id, player);
 
                 ObjectManager.Instance.RegisterTeam(gameObject.Id, player.Info.Player.Team);

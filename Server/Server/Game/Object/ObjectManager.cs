@@ -100,22 +100,26 @@ namespace Server.Game
 
         public void RegisterTeam(int ObjectId, int team)
         {
-            _teams.Add(ObjectId, team);
+            lock (_lock)
+            {
+                _teams.Add(ObjectId, team);
+            }
         }
 
         public int GetTeam(int objectId)
         {
-            foreach (var kvp in _teams)
+            lock (_lock)
             {
-                if (kvp.Key == objectId)
-                    return kvp.Value;
+                return _teams.TryGetValue(objectId, out int team) ? team : -1;
             }
-            return -1;
         }
       
         public int GetPlayerCount()
         {
-            return _players.Count;
+            lock (_lock)
+            {
+                return _players.Count;
+            }
         }
     }
 }
